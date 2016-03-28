@@ -306,7 +306,14 @@ class ProgressPane(BarPane):
         else:
             tm = self.status.get('time')
             elapsed, total = tm.split(':')
-            pos = int((float(elapsed) / float(total)) * (self.width - 1))
+            try:
+                pos = int((float(elapsed) / float(total)) * (self.width - 1))
+            except ZeroDivisionError:
+                # it may happen during streaming (m3u files), where
+                # the `total` time is not defined, so the whole
+                # division does not make sense.
+                # `pos=0` means the progress bar does not advance.
+                pos = 0
             return '=' * pos + '0' + '-' * (self.width - pos - 1)
 
     def update_win(self):
@@ -702,7 +709,7 @@ class QueuePane(CursedPane):
             item = self.queue[i]
             title = get_tag('title', item) or os.path.basename(item['file'])
             rating = item['rating']
-            tm = format_time(item['time'])
+            tm = format_time(item.get('time', "0"))
 
             if i == self.cur:
                 self.win.attron(curses.A_BOLD)
@@ -1064,8 +1071,9 @@ class LyricsPane(ScrollPane, threading.Thread):
                     self._lyrics_state = 'local'
                 # if local lrc doesn't exist, fetch from Internet
                 else:
-                    self._lyrics = ttplyrics.fetch_lyrics(self._transtag(self._artist), \
-                            self._transtag(self._title))
+                    # WINTER: don't fetch lyrics for now (add a way to disable it, maybe?)
+                    # self._lyrics = ttplyrics.fetch_lyrics(self._transtag(self._artist), \
+                    #        self._transtag(self._title))
                     # inform round2: lyrics has been fetched
                     self._lyrics_state = 'net'
             self._osong = self._nsong
