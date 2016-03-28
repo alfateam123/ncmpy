@@ -25,10 +25,13 @@ import codecs
 import random
 from xml.dom.minidom import parse, parseString
 
+import logging
+logging.basicConfig(filename="test.log", level=logging.DEBUG)
+
 try:
   import urllib2
 except ImportError:
-  import urllib
+  import urllib as urllib2
 
 def CodeFunc(Id, data):
     length = len(data)
@@ -89,11 +92,13 @@ def CodeFunc(Id, data):
         tmp1 = tmp1 - 0x100000000
     return tmp1
 
-def EncodeArtTit(str):
+def EncodeArtTit(str_):
     rtn = ''
-    str = str.encode('UTF-16')[2:]
-    for i in range(len(str)):
-        rtn += '%02x' % ord(str[i])
+    logging.debug("str_ before utf-16 encoding {0}".format(str_))
+    str_ = str_.encode('UTF-16')[2:]
+    logging.debug("str_ after utf-16 encoding {0}".format(str_))
+    for i in range(len(str_)):
+        rtn += '%02x' %  ord(str_[i])
 
     return rtn
 
@@ -101,8 +106,9 @@ def fetch_lyrics(artist, title):
     # fixed headers
     headers =  {'User-agent' : 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)'}
 
-    artist = artist.decode('UTF-8')
-    title = title.decode('UTF-8')
+    artist = artist #.decode('UTF-8')
+    title = title #.decode('UTF-8')
+    logging.debug("artist: {0}, title: {1}".format(artist, title))
 
     try:
         url = 'http://ttlrcct2.qianqian.com/dll/lyricsvr.dll?sh?Artist={}&Title={}&Flags=0'.format(
