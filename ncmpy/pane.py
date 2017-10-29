@@ -15,6 +15,8 @@ import ncmpy.ttplyrics as ttplyrics
 from ncmpy.config import *
 from ncmpy.util import *
 
+import logging
+
 class Pane():
     '''Base class of all panes.'''
 
@@ -223,13 +225,16 @@ class CursedPane(BlockPane):
                 if panename in ['Queue', 'Search']:
                     title = get_tag('title', item) or os.path.basename(item['file'])
                 elif panename == 'Database':
-                    title = item.values()[0]
+                    logging.debug(item)
+                    title = list(item.values())[0]
                 elif panename == 'Artist-Album':
                     if self._type in ['artist', 'album']:
                         title = item
                     elif self._type == 'song':
                         title = get_tag('title', item) or os.path.basename(item['file'])
 
+                logging.debug(self.main.search)
+                logging.debug(title)
                 if title.find(self.main.search) != -1:
                     has_match = True
                     if di == 1 and i <= self.sel:
